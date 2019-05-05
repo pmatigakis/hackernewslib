@@ -1,5 +1,7 @@
 from firebase.firebase import FirebaseApplication
 
+from hackernewslib.schemas import ItemSchema
+
 
 def create_client(api_url="https://hacker-news.firebaseio.com"):
     app = FirebaseApplication(api_url, None)
@@ -11,6 +13,8 @@ class HackernewsFirebaseClient(object):
     def __init__(self, app):
         self.app = app
 
+        self.item_schema = ItemSchema()
+
     @property
     def api_url(self):
         return self.app.dsn
@@ -19,7 +23,10 @@ class HackernewsFirebaseClient(object):
         return self.app.get("/v0//maxitem", None)
 
     def item(self, item_id):
-        return self.app.get("/v0//item", item_id)
+        item_data = self.app.get("/v0//item", item_id)
+        deserialization_result = self.item_schema.load(item_data)
+
+        return deserialization_result.data
 
     def items(self, item_ids):
         for item_id in item_ids:
