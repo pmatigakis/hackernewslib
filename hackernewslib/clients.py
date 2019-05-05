@@ -1,9 +1,4 @@
-from logging import getLogger
-
 from firebase.firebase import FirebaseApplication
-from newspaper import Article, ArticleException
-
-logger = getLogger(__name__)
 
 
 def create_client(api_url="https://hacker-news.firebaseio.com"):
@@ -26,40 +21,9 @@ class HackernewsFirebaseClient(object):
     def item(self, item_id):
         return self.app.get("/v0//item", item_id)
 
-    def _extract_story_article(self, story):
-        try:
-            article = Article(story["url"])
-            article.download()
-            article.parse()
-            article.nlp()
-        except ArticleException:
-            logger.error("failed to extract article for story with id %s",
-                         story["id"])
-
-            return None
-
-        return {
-            "html": article.html,
-            "authors": article.authors,
-            "publish_date": article.publish_date,
-            "text": article.text,
-            "top_image": article.top_image,
-            "images": article.images,
-            "movies": article.movies,
-            "keywords": article.keywords,
-            "summary": article.summary
-        }
-
-    def _contains_valid_url(self, item):
-        return "url" in item and item["url"].startswith(("http://", "https://"))
-
     def items(self, item_ids):
         for item_id in item_ids:
             item = self.item(item_id)
-
-            item["article"] = None
-            if item["type"] == "story" and self._contains_valid_url(item):
-                item["article"] = self._extract_story_article(item)
 
             yield item
 
