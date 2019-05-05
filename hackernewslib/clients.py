@@ -50,10 +50,15 @@ class HackernewsFirebaseClient(object):
             "summary": article.summary
         }
 
+    def _contains_valid_url(self, item):
+        return "url" in item and item["url"].startswith(("http://", "https://"))
+
     def items(self, item_ids):
         for item_id in item_ids:
             item = self.item(item_id)
-            if item["type"] == "story":
+
+            item["article"] = None
+            if item["type"] == "story" and self._contains_valid_url(item):
                 item["article"] = self._extract_story_article(item)
 
             yield item
