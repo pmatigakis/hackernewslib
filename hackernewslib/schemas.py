@@ -19,7 +19,3 @@ class ItemSchema(Schema):
     title = fields.String(required=False, allow_none=True)
     parts = fields.List(fields.Integer(), required=False, allow_none=True)
     descendants = fields.Integer(required=False, allow_none=True)
-
-    @post_load
-    def make_item(self, data):
-        return Item(**data)

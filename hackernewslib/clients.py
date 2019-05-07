@@ -1,5 +1,6 @@
 from firebase.firebase import FirebaseApplication
 
+from hackernewslib.models import Item
 from hackernewslib.schemas import ItemSchema
 
 
@@ -26,7 +27,7 @@ class HackernewsFirebaseClient(object):
         item_data = self.app.get("/v0//item", item_id)
         deserialization_result = self.item_schema.load(item_data)
 
-        return deserialization_result.data
+        return Item(client=self, **deserialization_result.data)
 
     def items(self, item_ids):
         for item_id in item_ids:
