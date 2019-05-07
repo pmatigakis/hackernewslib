@@ -1,6 +1,4 @@
-from marshmallow import Schema, fields, post_load
-
-from hackernewslib.models import Item
+from marshmallow import Schema, fields
 
 
 class ItemSchema(Schema):
