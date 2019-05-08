@@ -11,39 +11,55 @@ class Item(object):
             self.time = time
             self.text = text
             self.dead = dead
-            self._parent = parent
-            self._poll = poll
-            self._kids = kids
+            self.parent_id = parent
+            self._parent = None
+            self.poll_id = poll
+            self._poll = None
+            self.kid_ids = kids
+            self._kids = None
             self.url = url
             self.score = score
             self.title = title
-            self._parts = parts
+            self.part_ids = parts
+            self._parts = None
             self.descendants = descendants
 
     @property
     def parent(self):
-        return (
-            self.client.item(self._parent)
-            if self._parent is not None
-            else None
-        )
+        if self.parent_id is not None and self._parent is None:
+            self._parent = self.client.item(self.parent_id)
+
+        return self._parent
 
     @property
     def poll(self):
-        return (
-            self.client.item(self._poll)
-            if self._poll is not None
-            else None
-        )
+        if self.poll_id is not None and self._poll is None:
+            self._poll = self.client.item(self.poll_id)
+
+        return self._poll
 
     @property
     def kids(self):
-        kid_ids = self._kids or []
+        if self._kids is not None:
+            for kid in self._kids:
+                yield kid
+        else:
+            kid_ids = self.kid_ids or []
+            self._kids = []
 
-        return self.client.items(kid_ids)
+            for kid in self.client.items(kid_ids):
+                self._kids.append(kid)
+                yield kid
 
     @property
     def parts(self):
-        part_ids = self._parts or []
+        if self._parts is not None:
+            for part in self._parts:
+                yield part
+        else:
+            part_ids = self.part_ids or []
+            self._parts = []
 
-        return self.client.items(part_ids)
+            for part in self.client.items(part_ids):
+                self._parts.append(part)
+                yield part
