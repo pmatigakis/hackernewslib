@@ -2,6 +2,7 @@ from firebase.firebase import FirebaseApplication
 
 from hackernewslib.models import Item
 from hackernewslib.schemas import ItemSchema
+from hackernewslib.loaders import Loader
 
 
 def create_client(api_url="https://hacker-news.firebaseio.com"):
@@ -15,6 +16,7 @@ class HackernewsFirebaseClient(object):
         self.app = app
 
         self.item_schema = ItemSchema()
+        self.loader = Loader()
 
     @property
     def api_url(self):
@@ -25,9 +27,13 @@ class HackernewsFirebaseClient(object):
 
     def item(self, item_id):
         item_data = self.app.get("/v0//item", item_id)
+        if item_data is None:
+            # TODO: raise an exception instead of returning None
+            return None
+        
         deserialization_result = self.item_schema.load(item_data)
 
-        return Item(client=self, **deserialization_result.data)
+        return self.loader.load(self, deserialization_result.data)
 
     def items(self, item_ids):
         for item_id in item_ids:
