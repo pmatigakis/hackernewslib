@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 
-from hackernewslib.mixins import KidsMixin, UserMixin
+from hackernewslib.mixins import KidsMixin, UserMixin, ContentMixin
 
 
 class Item(object, metaclass=ABCMeta):
@@ -16,7 +16,7 @@ class Item(object, metaclass=ABCMeta):
         pass
 
 
-class Story(Item, KidsMixin, UserMixin):
+class Story(Item, KidsMixin, UserMixin, ContentMixin):
     def __init__(self, client, id, data, by=None, descendants=None, score=None,
                  time=None, title=None, url=None, kids=None, text=None):
         super(Story, self).__init__(
@@ -32,6 +32,8 @@ class Story(Item, KidsMixin, UserMixin):
         self.time = time
         self.title = title
         self.url = url
+        self._content = None
+        self._article = None
         self.kid_ids = kids
         self._kids = None
         self.text = text
@@ -92,7 +94,7 @@ class Comment(Item, KidsMixin, UserMixin):
         return self._parent
 
 
-class Job(Item, UserMixin):
+class Job(Item, UserMixin, ContentMixin):
     def __init__(self, client, id, data, by=None, score=None, text=None,
                  time=None, title=None, url=None):
         super(Job, self).__init__(
@@ -108,6 +110,8 @@ class Job(Item, UserMixin):
         self.time = time
         self.title = title
         self.url = url
+        self._content = None
+        self._article = None
 
     @classmethod
     def parse(cls, client, item):
@@ -249,3 +253,9 @@ class User(object):
             for item in self.client.items(submitted_ids):
                 self._submitted.append(item)
                 yield item
+
+
+class Content(object):
+    def __init__(self, url, response):
+        self.url = url
+        self.response = response

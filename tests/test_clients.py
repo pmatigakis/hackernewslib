@@ -8,6 +8,7 @@ from hackernewslib.models import Story, Comment, Job, Poll, Part, Raw, User
 
 class HackernewsFirebaseClientTests(TestCase):
     def test_get_story(self):
+        session = MagicMock()
         firebase_app = MagicMock()
         firebase_app.get.return_value = {
             "by": "user_1",
@@ -21,7 +22,7 @@ class HackernewsFirebaseClientTests(TestCase):
             "url": "http://www.example.com/story_1"
         }
 
-        client = HackernewsFirebaseClient(firebase_app)
+        client = HackernewsFirebaseClient(firebase_app, session)
         story = client.item(1)
 
         self.assertIsInstance(story, Story)
@@ -39,6 +40,7 @@ class HackernewsFirebaseClientTests(TestCase):
         firebase_app.get.assert_called_once_with("/v0//item", 1)
 
     def test_get_comment(self):
+        session = MagicMock()
         firebase_app = MagicMock()
         firebase_app.get.return_value = {
             "by": "user_1",
@@ -50,7 +52,7 @@ class HackernewsFirebaseClientTests(TestCase):
             "type": "comment"
         }
 
-        client = HackernewsFirebaseClient(firebase_app)
+        client = HackernewsFirebaseClient(firebase_app, session)
         comment = client.item(1)
 
         self.assertIsInstance(comment, Comment)
@@ -65,6 +67,7 @@ class HackernewsFirebaseClientTests(TestCase):
         firebase_app.get.assert_called_once_with("/v0//item", 1)
 
     def test_get_ask(self):
+        session = MagicMock()
         firebase_app = MagicMock()
         firebase_app.get.return_value = {
             "by": "user_1",
@@ -79,7 +82,7 @@ class HackernewsFirebaseClientTests(TestCase):
             "url": "http://www.example.com/question_1"
         }
 
-        client = HackernewsFirebaseClient(firebase_app)
+        client = HackernewsFirebaseClient(firebase_app, session)
         story = client.item(1)
 
         self.assertIsInstance(story, Story)
@@ -97,6 +100,7 @@ class HackernewsFirebaseClientTests(TestCase):
         firebase_app.get.assert_called_once_with("/v0//item", 1)
 
     def test_get_job(self):
+        session = MagicMock()
         firebase_app = MagicMock()
         firebase_app.get.return_value = {
             "by": "user_1",
@@ -109,7 +113,7 @@ class HackernewsFirebaseClientTests(TestCase):
             "url": "http://www.example.com/job_1"
         }
 
-        client = HackernewsFirebaseClient(firebase_app)
+        client = HackernewsFirebaseClient(firebase_app, session)
         job = client.item(1)
 
         self.assertIsInstance(job, Job)
@@ -125,6 +129,7 @@ class HackernewsFirebaseClientTests(TestCase):
         firebase_app.get.assert_called_once_with("/v0//item", 1)
 
     def test_get_poll(self):
+        session = MagicMock()
         firebase_app = MagicMock()
         firebase_app.get.return_value = {
             "by": "user_1",
@@ -139,7 +144,7 @@ class HackernewsFirebaseClientTests(TestCase):
             "type": "poll"
         }
 
-        client = HackernewsFirebaseClient(firebase_app)
+        client = HackernewsFirebaseClient(firebase_app, session)
         poll = client.item(1)
 
         self.assertIsInstance(poll, Poll)
@@ -157,6 +162,7 @@ class HackernewsFirebaseClientTests(TestCase):
         firebase_app.get.assert_called_once_with("/v0//item", 1)
 
     def test_get_part(self):
+        session = MagicMock()
         firebase_app = MagicMock()
         firebase_app.get.return_value = {
             "by": "user_1",
@@ -168,7 +174,7 @@ class HackernewsFirebaseClientTests(TestCase):
             "type": "pollopt"
         }
 
-        client = HackernewsFirebaseClient(firebase_app)
+        client = HackernewsFirebaseClient(firebase_app, session)
         poll = client.item(1)
 
         self.assertIsInstance(poll, Part)
@@ -183,10 +189,11 @@ class HackernewsFirebaseClientTests(TestCase):
         firebase_app.get.assert_called_once_with("/v0//item", 1)
 
     def test_get_unknown_item(self):
+        session = MagicMock()
         firebase_app = MagicMock()
         firebase_app.get.return_value = None
 
-        client = HackernewsFirebaseClient(firebase_app)
+        client = HackernewsFirebaseClient(firebase_app, session)
         item = client.item(1)
 
         self.assertIsNone(item)
@@ -194,6 +201,7 @@ class HackernewsFirebaseClientTests(TestCase):
         firebase_app.get.assert_called_once_with("/v0//item", 1)
 
     def test_get_unknown_item_type(self):
+        session = MagicMock()
         firebase_app = MagicMock()
         firebase_app.get.return_value = {
             "id": 1,
@@ -201,7 +209,7 @@ class HackernewsFirebaseClientTests(TestCase):
             "message": "hello"
         }
 
-        client = HackernewsFirebaseClient(firebase_app)
+        client = HackernewsFirebaseClient(firebase_app, session)
         item = client.item(1)
 
         self.assertIsInstance(item, Raw)
@@ -218,12 +226,13 @@ class HackernewsFirebaseClientTests(TestCase):
         firebase_app.get.assert_called_once_with("/v0//item", 1)
 
     def test_get_malformed_item(self):
+        session = MagicMock()
         firebase_app = MagicMock()
         firebase_app.get.return_value = {
             "message": "hello"
         }
 
-        client = HackernewsFirebaseClient(firebase_app)
+        client = HackernewsFirebaseClient(firebase_app, session)
 
         with self.assertRaises(InvalidItemContents) as e:
             client.item(1)
@@ -245,6 +254,7 @@ class HackernewsFirebaseClientTests(TestCase):
         firebase_app.get.assert_called_once_with("/v0//item", 1)
 
     def test_get_user(self):
+        session = MagicMock()
         firebase_app = MagicMock()
         firebase_app.get.return_value = {
             "about": "This is a user",
@@ -255,7 +265,7 @@ class HackernewsFirebaseClientTests(TestCase):
             "submitted": [1, 2, 3]
         }
 
-        client = HackernewsFirebaseClient(firebase_app)
+        client = HackernewsFirebaseClient(firebase_app, session)
         user = client.user("user_1")
 
         self.assertIsInstance(user, User)
@@ -269,10 +279,11 @@ class HackernewsFirebaseClientTests(TestCase):
         firebase_app.get.assert_called_once_with("/v0//user", "user_1")
 
     def test_get_user_that_does_not_exist(self):
+        session = MagicMock()
         firebase_app = MagicMock()
         firebase_app.get.return_value = None
 
-        client = HackernewsFirebaseClient(firebase_app)
+        client = HackernewsFirebaseClient(firebase_app, session)
         user = client.user("user_1")
 
         self.assertIsNone(user)
@@ -280,12 +291,13 @@ class HackernewsFirebaseClientTests(TestCase):
         firebase_app.get.assert_called_once_with("/v0//user", "user_1")
 
     def test_get_user_with_malformed_response(self):
+        session = MagicMock()
         firebase_app = MagicMock()
         firebase_app.get.return_value = {
             "message": "hello"
         }
 
-        client = HackernewsFirebaseClient(firebase_app)
+        client = HackernewsFirebaseClient(firebase_app, session)
 
         with self.assertRaises(InvalidItemContents) as e:
             client.user("user_1")

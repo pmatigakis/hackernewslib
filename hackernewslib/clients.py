@@ -1,20 +1,23 @@
 from firebase.firebase import FirebaseApplication
+from requests import Session
 
 from hackernewslib.exceptions import InvalidItemContents
 from hackernewslib.loaders import Loader
 from hackernewslib.schemas import ItemSchema, UserSchema
-from hackernewslib.models import User
+from hackernewslib.models import User, Content
 
 
 def create_client(api_url="https://hacker-news.firebaseio.com"):
     app = FirebaseApplication(api_url, None)
+    session = Session()
 
-    return HackernewsFirebaseClient(app)
+    return HackernewsFirebaseClient(app, session)
 
 
 class HackernewsFirebaseClient(object):
-    def __init__(self, app):
+    def __init__(self, app, session):
         self.app = app
+        self.session = session
 
         self.item_schema = ItemSchema()
         self.user_schema = UserSchema()
@@ -23,6 +26,14 @@ class HackernewsFirebaseClient(object):
     @property
     def api_url(self):
         return self.app.dsn
+
+    def download(self, url):
+        response = self.session.get(url, timeout=5, verify=False)
+
+        return Content(
+            url=url,
+            response=response
+        )
 
     def max_item(self):
         return self.app.get("/v0//maxitem", None)
