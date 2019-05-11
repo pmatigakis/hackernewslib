@@ -3,7 +3,7 @@ from unittest.mock import MagicMock
 
 from hackernewslib.clients import HackernewsFirebaseClient
 from hackernewslib.exceptions import InvalidItemContents
-from hackernewslib.models import Story, Comment, Job, Poll, Part, Item
+from hackernewslib.models import Story, Comment, Job, Poll, Part, Item, User
 
 
 class HackernewsFirebaseClientTests(TestCase):
@@ -27,7 +27,7 @@ class HackernewsFirebaseClientTests(TestCase):
         self.assertIsInstance(story, Story)
         self.assertEqual(story.id, 1)
         self.assertEqual(story.descendants, 10)
-        self.assertEqual(story.by, "user_1")
+        self.assertEqual(story.by_username, "user_1")
         self.assertCountEqual(story.kid_ids, [2, 3])
         self.assertEqual(story.score, 100)
         self.assertEqual(story.time, 1175714200)
@@ -56,7 +56,7 @@ class HackernewsFirebaseClientTests(TestCase):
         self.assertIsInstance(comment, Comment)
         self.assertEqual(comment.id, 1)
         self.assertEqual(comment.parent_id, 4)
-        self.assertEqual(comment.by, "user_1")
+        self.assertEqual(comment.by_username, "user_1")
         self.assertCountEqual(comment.kid_ids, [2, 3])
         self.assertEqual(comment.text, "This is a comment")
         self.assertEqual(comment.type, "comment")
@@ -85,7 +85,7 @@ class HackernewsFirebaseClientTests(TestCase):
         self.assertIsInstance(story, Story)
         self.assertEqual(story.id, 1)
         self.assertEqual(story.descendants, 10)
-        self.assertEqual(story.by, "user_1")
+        self.assertEqual(story.by_username, "user_1")
         self.assertCountEqual(story.kid_ids, [2, 3])
         self.assertEqual(story.score, 100)
         self.assertEqual(story.time, 1203647620)
@@ -114,7 +114,7 @@ class HackernewsFirebaseClientTests(TestCase):
 
         self.assertIsInstance(job, Job)
         self.assertEqual(job.id, 1)
-        self.assertEqual(job.by, "user_1")
+        self.assertEqual(job.by_username, "user_1")
         self.assertEqual(job.score, 100)
         self.assertEqual(job.time, 1210981217)
         self.assertEqual(job.title, "Job post")
@@ -144,7 +144,7 @@ class HackernewsFirebaseClientTests(TestCase):
 
         self.assertIsInstance(poll, Poll)
         self.assertEqual(poll.id, 1)
-        self.assertEqual(poll.by, "user_1")
+        self.assertEqual(poll.by_username, "user_1")
         self.assertEqual(poll.descendants, 10)
         self.assertEqual(poll.score, 100)
         self.assertEqual(poll.time, 1204403652)
@@ -173,7 +173,7 @@ class HackernewsFirebaseClientTests(TestCase):
 
         self.assertIsInstance(poll, Part)
         self.assertEqual(poll.id, 1)
-        self.assertEqual(poll.by, "user_1")
+        self.assertEqual(poll.by_username, "user_1")
         self.assertEqual(poll.score, 100)
         self.assertEqual(poll.time, 1207886576)
         self.assertEqual(poll.type, "pollopt")
@@ -243,6 +243,70 @@ class HackernewsFirebaseClientTests(TestCase):
         )
 
         firebase_app.get.assert_called_once_with("/v0//item", 1)
+
+    def test_get_user(self):
+        firebase_app = MagicMock()
+        firebase_app.get.return_value = {
+            "about": "This is a user",
+            "created": 1173923446,
+            "delay": 0,
+            "id": "user_1",
+            "karma": 100,
+            "submitted": [1, 2, 3]
+        }
+
+        client = HackernewsFirebaseClient(firebase_app)
+        user = client.user("user_1")
+
+        self.assertIsInstance(user, User)
+        self.assertEqual(user.id, "user_1")
+        self.assertEqual(user.created, 1173923446)
+        self.assertEqual(user.delay, 0)
+        self.assertEqual(user.about, "This is a user")
+        self.assertEqual(user.karma, 100)
+        self.assertCountEqual(user.submitted_ids, [1, 2, 3])
+
+        firebase_app.get.assert_called_once_with("/v0//user", "user_1")
+
+    def test_get_user_that_does_not_exist(self):
+        firebase_app = MagicMock()
+        firebase_app.get.return_value = None
+
+        client = HackernewsFirebaseClient(firebase_app)
+        user = client.user("user_1")
+
+        self.assertIsNone(user)
+
+        firebase_app.get.assert_called_once_with("/v0//user", "user_1")
+
+    def test_get_user_with_malformed_response(self):
+        firebase_app = MagicMock()
+        firebase_app.get.return_value = {
+            "message": "hello"
+        }
+
+        client = HackernewsFirebaseClient(firebase_app)
+
+        with self.assertRaises(InvalidItemContents) as e:
+            client.user("user_1")
+
+        self.assertDictEqual(
+            e.exception.data,
+            {
+                "message": "hello"
+            }
+        )
+
+        self.assertDictEqual(
+            e.exception.errors,
+            {
+                "created": ["Missing data for required field."],
+                "id": ["Missing data for required field."],
+                "karma": ["Missing data for required field."]
+            }
+        )
+
+        firebase_app.get.assert_called_once_with("/v0//user", "user_1")
 
 
 if __name__ == "__main__":
