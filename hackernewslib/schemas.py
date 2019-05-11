@@ -17,3 +17,12 @@ class ItemSchema(Schema):
     title = fields.String(required=False, allow_none=True)
     parts = fields.List(fields.Integer(), required=False, allow_none=True)
     descendants = fields.Integer(required=False, allow_none=True)
+
+
+class UserSchema(Schema):
+    id = fields.String(required=True, allow_none=False)
+    created = fields.Integer(required=True, allow_none=False)
+    karma = fields.Integer(required=True, allow_none=False)
+    about = fields.String(required=False, allow_none=True)
+    delay = fields.Integer(required=False, allow_none=True)
+    submitted = fields.List(fields.Integer(), required=False, allow_none=True)

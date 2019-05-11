@@ -2,7 +2,8 @@ from firebase.firebase import FirebaseApplication
 
 from hackernewslib.exceptions import InvalidItemContents
 from hackernewslib.loaders import Loader
-from hackernewslib.schemas import ItemSchema
+from hackernewslib.schemas import ItemSchema, UserSchema
+from hackernewslib.models import User
 
 
 def create_client(api_url="https://hacker-news.firebaseio.com"):
@@ -16,6 +17,7 @@ class HackernewsFirebaseClient(object):
         self.app = app
 
         self.item_schema = ItemSchema()
+        self.user_schema = UserSchema()
         self.loader = Loader()
 
     @property
@@ -46,7 +48,18 @@ class HackernewsFirebaseClient(object):
             yield item
 
     def user(self, username):
-        return self.app.get("/v0//user", username)
+        user_data = self.app.get("/v0//user", username)
+        if user_data is None:
+            return None
+
+        deserialization_result = self.user_schema.load(user_data)
+        if deserialization_result.errors:
+            raise InvalidItemContents(
+                data=user_data,
+                errors=deserialization_result.errors
+            )
+
+        return User(client=self, **deserialization_result.data)
 
     def _group_story_ids(self, story_group):
         return self.app.get(story_group, None)

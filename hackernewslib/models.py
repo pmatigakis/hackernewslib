@@ -13,6 +13,15 @@ class KidsMixin(object):
                 yield kid
 
 
+class UserMixin(object):
+    @property
+    def by(self):
+        if self.by_username is not None and self._by is None:
+            self._by = self.client.user(self.by_username)
+
+        return self._by
+
+
 class Item(object):
     fields = []
 
@@ -51,16 +60,19 @@ class Item(object):
         elif field == "poll":
             setattr(self, "poll_id", item.get("poll"))
             setattr(self, "_poll", None)
+        elif field == "by":
+            setattr(self, "by_username", item.get("by"))
+            setattr(self, "_by", None)
         else:
             setattr(self, field, item.get(field))
 
 
-class Story(Item, KidsMixin):
+class Story(Item, KidsMixin, UserMixin):
     fields = ["by", "descendants", "score", "time", "title", "url", "kids",
               "text"]
 
 
-class Comment(Item, KidsMixin):
+class Comment(Item, KidsMixin, UserMixin):
     fields = ["by", "text", "time", "kids", "parent"]
 
     @property
@@ -71,11 +83,11 @@ class Comment(Item, KidsMixin):
         return self._parent
 
 
-class Job(Item):
+class Job(Item, UserMixin):
     fields = ["by", "score", "text", "time", "title", "url"]
 
 
-class Poll(Item, KidsMixin):
+class Poll(Item, KidsMixin, UserMixin):
     fields = ["by", "descendants", "kids", "parts", "score", "text", "time",
               "title"]
 
@@ -93,7 +105,7 @@ class Poll(Item, KidsMixin):
                 yield part
 
 
-class Part(Item):
+class Part(Item, UserMixin):
     fields = ["by", "poll", "score", "text", "time"]
 
     @property
@@ -102,3 +114,16 @@ class Part(Item):
             self._poll = self.client.item(self.poll_id)
 
         return self._poll
+
+
+class User(object):
+    def __init__(self, client, id, created, karma, about=None, delay=None,
+                 submitted=None):
+        self.client = client
+        self.id = id
+        self.created = created
+        self.karma = karma
+        self.about = about
+        self.delay = delay
+        self.submitted_ids = submitted
+        self._submitted = None
