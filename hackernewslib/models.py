@@ -1,30 +1,9 @@
-class KidsMixin(object):
-    @property
-    def kids(self):
-        if self._kids is not None:
-            for kid in self._kids:
-                yield kid
-        else:
-            kid_ids = self.kid_ids or []
-            self._kids = []
+from abc import ABCMeta, abstractmethod
 
-            for kid in self.client.items(kid_ids):
-                self._kids.append(kid)
-                yield kid
+from hackernewslib.mixins import KidsMixin, UserMixin
 
 
-class UserMixin(object):
-    @property
-    def by(self):
-        if self.username is not None and self._by is None:
-            self._by = self.client.user(self.username)
-
-        return self._by
-
-
-class Item(object):
-    fields = []
-
+class Item(object, metaclass=ABCMeta):
     def __init__(self, client, id, data):
         self.client = client
         self.id = id
@@ -32,48 +11,78 @@ class Item(object):
         self.type = data.get("type")
 
     @classmethod
+    @abstractmethod
     def parse(cls, client, item):
-        instance = cls(
-            client=client,
-            id=item["id"],
-            data=item
-        )
-
-        instance._copy_fields(item, cls.fields)
-
-        return instance
-
-    def _copy_fields(self, item, fields):
-        for field in fields:
-            self._copy_field(item, field)
-
-    def _copy_field(self, item, field):
-        if field == "kids":
-            setattr(self, "kid_ids", item.get("kids"))
-            setattr(self, "_kids", None)
-        elif field == "parent":
-            setattr(self, "parent_id", item.get("parent"))
-            setattr(self, "_parent", None)
-        elif field == "parts":
-            setattr(self, "part_ids", item.get("parts"))
-            setattr(self, "_parts", None)
-        elif field == "poll":
-            setattr(self, "poll_id", item.get("poll"))
-            setattr(self, "_poll", None)
-        elif field == "by":
-            setattr(self, "username", item.get("by"))
-            setattr(self, "_by", None)
-        else:
-            setattr(self, field, item.get(field))
+        pass
 
 
 class Story(Item, KidsMixin, UserMixin):
-    fields = ["by", "descendants", "score", "time", "title", "url", "kids",
-              "text"]
+    def __init__(self, client, id, data, by=None, descendants=None, score=None,
+                 time=None, title=None, url=None, kids=None, text=None):
+        super(Story, self).__init__(
+            client=client,
+            id=id,
+            data=data
+        )
+
+        self.username = by
+        self._by = None
+        self.descendants = descendants
+        self.score = score
+        self.time = time
+        self.title = title
+        self.url = url
+        self.kid_ids = kids
+        self._kids = None
+        self.text = text
+
+    @classmethod
+    def parse(cls, client, item):
+        return cls(
+            client=client,
+            id=item["id"],
+            data=item,
+            by=item.get("by"),
+            descendants=item.get("descendants"),
+            score=item.get("score"),
+            time=item.get("time"),
+            title=item.get("title"),
+            url=item.get("url"),
+            kids=item.get("kids"),
+            text=item.get("text")
+        )
 
 
 class Comment(Item, KidsMixin, UserMixin):
-    fields = ["by", "text", "time", "kids", "parent"]
+    def __init__(self, client, id, data, by=None, text=None, time=None,
+                 kids=None, parent=None):
+        super(Comment, self).__init__(
+            client=client,
+            id=id,
+            data=data
+        )
+
+        self.username = by
+        self._by = None
+        self.text = text
+        self.time = time
+        self.kid_ids = kids
+        self._kids = None
+        self.parent_id = parent
+        self._parent = None
+
+    @classmethod
+    def parse(cls, client, item):
+        return cls(
+            client=client,
+            id=item["id"],
+            data=item,
+            by=item.get("by"),
+            text=item.get("text"),
+            time=item.get("time"),
+            kids=item.get("kids"),
+            parent=item.get("parent")
+        )
 
     @property
     def parent(self):
@@ -84,12 +93,73 @@ class Comment(Item, KidsMixin, UserMixin):
 
 
 class Job(Item, UserMixin):
-    fields = ["by", "score", "text", "time", "title", "url"]
+    def __init__(self, client, id, data, by=None, score=None, text=None,
+                 time=None, title=None, url=None):
+        super(Job, self).__init__(
+            client=client,
+            id=id,
+            data=data
+        )
+
+        self.username = by
+        self._by = None
+        self.score = score
+        self.text = text
+        self.time = time
+        self.title = title
+        self.url = url
+
+    @classmethod
+    def parse(cls, client, item):
+        return cls(
+            client=client,
+            id=item["id"],
+            data=item,
+            by=item.get("by"),
+            score=item.get("score"),
+            text=item.get("text"),
+            time=item.get("time"),
+            title=item.get("title"),
+            url=item.get("url")
+        )
 
 
 class Poll(Item, KidsMixin, UserMixin):
-    fields = ["by", "descendants", "kids", "parts", "score", "text", "time",
-              "title"]
+    def __init__(self, client, id, data, by=None, descendants=None, kids=None,
+                 parts=None, score=None, text=None, time=None, title=None):
+        super(Poll, self).__init__(
+            client=client,
+            id=id,
+            data=data
+        )
+
+        self.username = by
+        self._by = None
+        self.descendants = descendants
+        self.kid_ids = kids
+        self._kids = None
+        self.part_ids = parts
+        self._parts = None
+        self.score = score
+        self.text = text
+        self.time = time
+        self.title = title
+
+    @classmethod
+    def parse(cls, client, item):
+        return cls(
+            client=client,
+            id=item["id"],
+            data=item,
+            by=item.get("by"),
+            descendants=item.get("descendants"),
+            kids=item.get("kids"),
+            parts=item.get("parts"),
+            score=item.get("score"),
+            text=item.get("text"),
+            time=item.get("time"),
+            title=item.get("title")
+        )
 
     @property
     def parts(self):
@@ -108,12 +178,51 @@ class Poll(Item, KidsMixin, UserMixin):
 class Part(Item, UserMixin):
     fields = ["by", "poll", "score", "text", "time"]
 
+    def __init__(self, client, id, data, by=None, poll=None, score=None,
+                 text=None, time=None):
+        super(Part, self).__init__(
+            client=client,
+            id=id,
+            data=data
+        )
+
+        self.username = by
+        self._by = None
+        self.poll_id = poll
+        self._poll = None
+        self.score = score
+        self.text = text
+        self.time = time
+
+    @classmethod
+    def parse(cls, client, item):
+        return cls(
+            client=client,
+            id=item["id"],
+            data=item,
+            by=item.get("by"),
+            poll=item.get("poll"),
+            score=item.get("score"),
+            text=item.get("text"),
+            time=item.get("time")
+        )
+
     @property
     def poll(self):
         if self.poll_id is not None and self._poll is None:
             self._poll = self.client.item(self.poll_id)
 
         return self._poll
+
+
+class Raw(Item):
+    @classmethod
+    def parse(cls, client, item):
+        return cls(
+            client=client,
+            id=item["id"],
+            data=item
+        )
 
 
 class User(object):

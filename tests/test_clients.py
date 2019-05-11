@@ -3,7 +3,7 @@ from unittest.mock import MagicMock
 
 from hackernewslib.clients import HackernewsFirebaseClient
 from hackernewslib.exceptions import InvalidItemContents
-from hackernewslib.models import Story, Comment, Job, Poll, Part, Item, User
+from hackernewslib.models import Story, Comment, Job, Poll, Part, Raw, User
 
 
 class HackernewsFirebaseClientTests(TestCase):
@@ -204,7 +204,7 @@ class HackernewsFirebaseClientTests(TestCase):
         client = HackernewsFirebaseClient(firebase_app)
         item = client.item(1)
 
-        self.assertIsInstance(item, Item)
+        self.assertIsInstance(item, Raw)
         self.assertEqual(item.id, 1)
         self.assertEqual(item.type, "unknown")
         self.assertDictEqual(

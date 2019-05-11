@@ -1,4 +1,4 @@
-from hackernewslib.models import Story, Comment, Job, Poll, Part, Item
+from hackernewslib.models import Story, Comment, Job, Poll, Part, Raw
 
 
 class Loader(object):
@@ -12,15 +12,7 @@ class Loader(object):
         }
 
     def load(self, client, data):
-        item_id = data["id"]
-
-        item_class = self.supported_item_types.get(data.get("type"))
-        if item_class is None:
-            return Item(
-                client=client,
-                id=item_id,
-                data=data
-            )
+        item_class = self.supported_item_types.get(data.get("type"), Raw)
 
         return item_class.parse(
             client=client,
