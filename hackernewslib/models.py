@@ -56,7 +56,8 @@ class Item(object):
 
 
 class Story(Item, KidsMixin):
-    fields = ["by", "descendants", "score", "time", "title", "url", "kids"]
+    fields = ["by", "descendants", "score", "time", "title", "url", "kids",
+              "text"]
 
 
 class Comment(Item, KidsMixin):
@@ -68,11 +69,6 @@ class Comment(Item, KidsMixin):
             self._parent = self.client.item(self.parent_id)
 
         return self._parent
-
-
-class Ask(Item, KidsMixin):
-    fields = ["by", "descendants",  "score", "text", "time", "title", "url",
-              "kids"]
 
 
 class Job(Item):

@@ -1,4 +1,4 @@
-from hackernewslib.models import Story, Comment, Job, Poll, Part, Ask, Item
+from hackernewslib.models import Story, Comment, Job, Poll, Part, Item
 
 
 class Loader(object):
@@ -8,8 +8,7 @@ class Loader(object):
             "comment": Comment,
             "job": Job,
             "poll": Poll,
-            "part": Part,
-            "ask": Ask
+            "pollopt": Part
         }
 
     def load(self, client, data):
