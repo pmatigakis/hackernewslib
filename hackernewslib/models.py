@@ -16,8 +16,8 @@ class KidsMixin(object):
 class UserMixin(object):
     @property
     def by(self):
-        if self.by_username is not None and self._by is None:
-            self._by = self.client.user(self.by_username)
+        if self.username is not None and self._by is None:
+            self._by = self.client.user(self.username)
 
         return self._by
 
@@ -61,7 +61,7 @@ class Item(object):
             setattr(self, "poll_id", item.get("poll"))
             setattr(self, "_poll", None)
         elif field == "by":
-            setattr(self, "by_username", item.get("by"))
+            setattr(self, "username", item.get("by"))
             setattr(self, "_by", None)
         else:
             setattr(self, field, item.get(field))
