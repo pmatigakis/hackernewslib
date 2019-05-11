@@ -28,9 +28,8 @@ class HackernewsFirebaseClient(object):
     def item(self, item_id):
         item_data = self.app.get("/v0//item", item_id)
         if item_data is None:
-            # TODO: raise an exception instead of returning None
             return None
-        
+
         deserialization_result = self.item_schema.load(item_data)
 
         return self.loader.load(self, deserialization_result.data)
