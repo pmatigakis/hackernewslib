@@ -1,8 +1,8 @@
 from firebase.firebase import FirebaseApplication
 
-from hackernewslib.models import Item
-from hackernewslib.schemas import ItemSchema
+from hackernewslib.exceptions import InvalidItemContents
 from hackernewslib.loaders import Loader
+from hackernewslib.schemas import ItemSchema
 
 
 def create_client(api_url="https://hacker-news.firebaseio.com"):
@@ -31,6 +31,11 @@ class HackernewsFirebaseClient(object):
             return None
 
         deserialization_result = self.item_schema.load(item_data)
+        if deserialization_result.errors:
+            raise InvalidItemContents(
+                data=item_data,
+                errors=deserialization_result.errors
+            )
 
         return self.loader.load(self, deserialization_result.data)
 
