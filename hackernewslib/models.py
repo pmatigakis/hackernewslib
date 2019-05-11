@@ -127,3 +127,16 @@ class User(object):
         self.delay = delay
         self.submitted_ids = submitted
         self._submitted = None
+
+    @property
+    def submitted(self):
+        if self._submitted is not None:
+            for item in self._submitted:
+                yield item
+        else:
+            submitted_ids = self.submitted_ids or []
+            self._submitted = []
+
+            for item in self.client.items(submitted_ids):
+                self._submitted.append(item)
+                yield item
