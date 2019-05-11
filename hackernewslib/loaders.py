@@ -1,51 +1,23 @@
-from hackernewslib.models import Story, Raw, Comment, Job, Poll, Part, Ask
+from hackernewslib.models import Story, Comment, Job, Poll, Part, Ask, Item
 
 
 class Loader(object):
     def __init__(self):
-        self.item_mapper = {
-            "story": (
-                ["by", "descendants", "kids", "score", "time", "title", "url"],
-                Story
-            ),
-            "comment": (
-                ["by", "kids", "parent", "text", "time"],
-                Comment
-            ),
-            "ask": (
-                ["by", "descendants", "kids", "score", "text", "time", "title",
-                 "url"],
-                Ask
-            ),
-            "job": (
-                ["by", "score", "text", "time", "title", "url"],
-                Job
-            ),
-            "poll": (
-                ["by", "descendants", "kids", "parts", "score", "text", "time",
-                 "title"],
-                Poll
-            ),
-            "part": (
-                ["by", "poll", "score", "text", "time"],
-                Part
-            )
-        }
+        self.supported_item_types = [Story, Comment, Job, Poll, Part, Ask]
 
     def load(self, client, data):
-        item_loader = self.item_mapper.get(data["type"])
         item_id = data["id"]
+        item_type = data.get("type")
 
-        if item_loader is None:
-            return Raw(
-                client=client,
-                id=item_id,
-                data=data
-            )
+        for supported_item_type in self.supported_item_types:
+            if supported_item_type.item_type == item_type:
+                return supported_item_type.parse(
+                    client=client,
+                    item=data
+                )
 
-        required_fields, klass = item_loader
-        return klass(
+        return Item(
             client=client,
             id=item_id,
-            **{field: data[field] for field in required_fields if field in data}
+            data=data
         )
