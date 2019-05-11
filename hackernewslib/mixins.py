@@ -1,5 +1,3 @@
-from newspaper import Article
-
 class KidsMixin(object):
     @property
     def kids(self):
@@ -31,15 +29,3 @@ class ContentMixin(object):
             self._content = self.client.download(self.url)
 
         return self._content
-
-    @property
-    def article(self):
-        if self.content and self._article is None:
-            article = Article(self.url)
-            article.download(input_html=self.content.response.text)
-            article.parse()
-            article.nlp()
-
-            self._article = article
-
-        return self._article

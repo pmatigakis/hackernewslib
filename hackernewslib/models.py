@@ -33,7 +33,6 @@ class Story(Item, KidsMixin, UserMixin, ContentMixin):
         self.title = title
         self.url = url
         self._content = None
-        self._article = None
         self.kid_ids = kids
         self._kids = None
         self.text = text
@@ -111,7 +110,6 @@ class Job(Item, UserMixin, ContentMixin):
         self.title = title
         self.url = url
         self._content = None
-        self._article = None
 
     @classmethod
     def parse(cls, client, item):
