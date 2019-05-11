@@ -14,13 +14,13 @@ class KidsMixin(object):
 
 
 class Item(object):
-    item_type = None
     fields = []
 
     def __init__(self, client, id, data):
         self.client = client
         self.id = id
         self.data = data
+        self.type = data.get("type")
 
     @classmethod
     def parse(cls, client, item):
@@ -56,12 +56,10 @@ class Item(object):
 
 
 class Story(Item, KidsMixin):
-    item_type = "story"
     fields = ["by", "descendants", "score", "time", "title", "url", "kids"]
 
 
 class Comment(Item, KidsMixin):
-    item_type = "comment"
     fields = ["by", "text", "time", "kids", "parent"]
 
     @property
@@ -73,18 +71,15 @@ class Comment(Item, KidsMixin):
 
 
 class Ask(Item, KidsMixin):
-    item_type = "ask"
     fields = ["by", "descendants",  "score", "text", "time", "title", "url",
               "kids"]
 
 
 class Job(Item):
-    item_type = "job"
     fields = ["by", "score", "text", "time", "title", "url"]
 
 
 class Poll(Item, KidsMixin):
-    item_type = "poll"
     fields = ["by", "descendants", "kids", "parts", "score", "text", "time",
               "title"]
 
@@ -103,7 +98,6 @@ class Poll(Item, KidsMixin):
 
 
 class Part(Item):
-    item_type = "part"
     fields = ["by", "poll", "score", "text", "time"]
 
     @property
