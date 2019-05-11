@@ -256,4 +256,7 @@ class User(object):
 class Content(object):
     def __init__(self, url, response):
         self.url = url
-        self.response = response
+        self.status_code = response.status_code
+        self.headers = dict(response.headers)
+        self.content = response.content
+        self.text = response.text
