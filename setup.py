@@ -26,5 +26,14 @@ setup(
     setup_requires=read_requirements("requirements-setup.txt"),
     tests_require=read_requirements("requirements-test.txt"),
     include_package_data=True,
-    zip_safe=False
+    zip_safe=False,
+    classifiers=[
+        'Development Status :: 5 - Alpha',
+        'Intended Audience :: Developers',
+        'Natural Language :: English',
+        'License :: OSI Approved :: MIT License',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: Implementation :: CPython'
+    ]
 )
