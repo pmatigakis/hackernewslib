@@ -21,6 +21,8 @@ setup(
     author_email="pmatigakis@gmail.com",
     description="Hackernews client library",
     long_description=read_long_description(),
+    long_description_content_type="text/markdown",
+    url="https://github.com/pmatigakis/hackernewslib",
     packages=find_packages(include=["hackernewslib"]),
     install_requires=read_requirements("requirements.txt"),
     setup_requires=read_requirements("requirements-setup.txt"),
@@ -34,6 +36,7 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: Implementation :: CPython'
+        'Programming Language :: Python :: Implementation :: CPython',
+        'Operating System :: OS Independent'
     ]
 )
